@@ -1,8 +1,9 @@
 const express = require("express");
 const router = express.Router();
 const uploader = require("../../middlewares/uploader");
-const { movieGet } = require("./movies.controller");
+const { movieGet, createMovie } = require("./movies.controllers");
 
-router.post("/", movieGet);
+router.get("/", movieGet);
+router.post("/", createMovie);
 
 module.exports = router;

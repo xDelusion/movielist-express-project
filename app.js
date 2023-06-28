@@ -3,7 +3,7 @@ const express = require("express");
 const morgan = require("morgan");
 require("dotenv").config();
 const connectDB = require("./database");
-// const moviesRoutes = require("./api/movies/movies.routes");
+const moviesRoutes = require("./api/movies/movies.routes");
 const notFound = require("./middlewares/notFound");
 const errorHandle = require("./middlewares/errorHandle");
 // setup
@@ -14,7 +14,7 @@ app.use(morgan("dev"));
 app.use(express.json());
 
 // routes
-// app.use("/movies", moviesRoutes);
+app.use("/movies", moviesRoutes);
 
 // middlewares (after router)
 app.use(notFound);
