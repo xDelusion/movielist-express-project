@@ -9,6 +9,8 @@ const cors = require("cors");
 const moviesRoutes = require("./api/movies/movies.routes");
 const actorRoutes = require("./api/actors/actors.routes");
 const authRoutes = require("./api/auth/auth.routes");
+const genreRoutes = require("./api/genres/genres.routes");
+
 const notFound = require("./middlewares/notFound");
 const errorHandle = require("./middlewares/errorHandle");
 
@@ -27,6 +29,7 @@ passport.use(localStrategy);
 app.use("/movies", moviesRoutes);
 app.use("/actors", actorRoutes);
 app.use("/auth", authRoutes);
+app.use("/genres", genreRoutes);
 
 // middlewares (after router)
 app.use(notFound);

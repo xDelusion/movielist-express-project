@@ -13,6 +13,7 @@ const createToken = (user) => {
   const payload = {
     _id: user._id,
     username: user.username,
+    email: user.email,
   };
   const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "5h" });
   return token;
@@ -20,6 +21,9 @@ const createToken = (user) => {
 
 exports.signUp = async (req, res, next) => {
   try {
+    if (req.file) {
+      req.body.profileImage = `${req.file.path.replace("\\", "/")}`;
+    }
     // overwrite and hash password
     const { password } = req.body;
     req.body.password = await hashPassword(password);

@@ -4,7 +4,12 @@ const movieSchema = new Schema(
   {
     title: { type: String, required: true },
     releaseDate: { type: Date, required: true },
-    genre: { type: String, required: true },
+    genre: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Genre",
+      },
+    ],
     actors: [
       {
         type: Schema.Types.ObjectId,
