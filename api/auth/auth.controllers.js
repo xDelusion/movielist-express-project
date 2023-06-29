@@ -4,7 +4,8 @@ const jwt = require("jsonwebtoken");
 const User = require("../../db/models/User");
 
 const hashPassword = async (password) => {
-  const hashedPassword = await bcrypt.hash(password, 10);
+  const saltRounds = 10;
+  const hashedPassword = await bcrypt.hash(password, saltRounds);
   return hashedPassword;
 };
 
@@ -30,7 +31,7 @@ exports.signUp = async (req, res, next) => {
     const token = createToken(newUser);
 
     // return token
-    return res.status(201).json(token);
+    return res.status(201).json({ token });
   } catch (error) {
     next(error);
   }
