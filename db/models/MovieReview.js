@@ -2,8 +2,8 @@ const { model, Schema } = require("mongoose");
 
 const movieReviewSchema = new Schema(
   {
-    rating: { type: number, required: true },
-    review: { type: number, required: true },
+    rating: { type: Number, required: true },
+    review: { type: String, required: true },
     userId: {
       type: Schema.Types.ObjectId,
       ref: "User",

@@ -24,6 +24,12 @@ const movieSchema = new Schema(
         message: "The 'actors' field can't be empty.",
       },
     },
+    reviews: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "MovieReview",
+      },
+    ],
   },
   { timestamps: true }
 );
