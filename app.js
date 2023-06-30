@@ -2,7 +2,7 @@
 const express = require("express");
 const morgan = require("morgan");
 const passport = require("passport");
-const { localStrategy } = require("./middlewares/passport");
+const { localStrategy, jwtStrategy } = require("./middlewares/passport");
 require("dotenv").config();
 const connectDB = require("./database");
 const cors = require("cors");
@@ -24,6 +24,7 @@ app.use(cors());
 app.use(express.json());
 app.use(passport.initialize());
 passport.use(localStrategy);
+passport.use(jwtStrategy);
 
 // routes
 app.use("/movies", moviesRoutes);

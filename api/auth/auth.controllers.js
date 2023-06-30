@@ -24,6 +24,7 @@ exports.signUp = async (req, res, next) => {
     if (req.file) {
       req.body.profileImage = `${req.file.path.replace("\\", "/")}`;
     }
+    console.log(req.body.isStaff);
     // overwrite and hash password
     const { password } = req.body;
     req.body.password = await hashPassword(password);
@@ -43,6 +44,5 @@ exports.signUp = async (req, res, next) => {
 
 exports.signIn = (req, res, next) => {
   const token = createToken(req.user);
-  console.log(req.user);
   return res.status(200).json({ token });
 };

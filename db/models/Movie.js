@@ -10,12 +10,20 @@ const movieSchema = new Schema(
         ref: "Genre",
       },
     ],
-    actors: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: "Actor",
+    actors: {
+      type: [
+        {
+          type: String,
+          required: true,
+        },
+      ],
+      validate: {
+        validator: (actors) => {
+          return actors && actors.length > 0;
+        },
+        message: "The 'actors' field can't be empty.",
       },
-    ],
+    },
   },
   { timestamps: true }
 );

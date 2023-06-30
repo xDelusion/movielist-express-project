@@ -6,6 +6,7 @@ const authSchema = new Schema(
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     profileImage: String,
+    isStaff: { type: Boolean, default: false },
   },
   { timestamps: true }
 );
