@@ -4,6 +4,10 @@ const movieSchema = new Schema(
   {
     title: { type: String, required: true },
     releaseDate: { type: Date, required: true },
+    avgRating: {
+      type: Number,
+      default: null,
+    },
     genre: [
       {
         type: Schema.Types.ObjectId,

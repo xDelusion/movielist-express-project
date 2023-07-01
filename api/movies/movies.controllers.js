@@ -1,11 +1,13 @@
 const Movie = require("../../db/models/Movie");
 const MovieReview = require("../../db/models/MovieReview");
+const User = require("../../db/models/User");
 
 exports.getMovie = async (req, res, next) => {
   try {
     const movies = await Movie.find()
       .populate("genre", "name -_id")
       .populate("reviews", "-movieId");
+
     res.json(movies);
   } catch (error) {
     return next(error);
@@ -56,7 +58,7 @@ exports.reviewMovie = async (req, res, next) => {
 
     // Check if the user has already reviewed the movie
     const existingReview = await MovieReview.findOne({
-      movieId: movie.id,
+      movieId: movie._id,
       userId: req.user._id,
     });
     if (existingReview) {
@@ -72,10 +74,76 @@ exports.reviewMovie = async (req, res, next) => {
       userId: req.user._id,
       movieId: movieId,
     });
-    console.log(req.user);
+
     movie.reviews.push(newReview);
+
+    // Calculate the average rating
+    const reviews = await MovieReview.find({ movieId: movie._id });
+    const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0);
+    const avgRating = totalRating / reviews.length;
+
+    movie.avgRating = avgRating;
+
     await movie.save();
     return res.status(201).json(newReview);
+  } catch (error) {
+    return next(error);
+  }
+};
+
+exports.addToWatchlist = async (req, res, next) => {
+  try {
+    if (!req.user) {
+      return res
+        .status(403)
+        .json({ message: "Only members can add movies to watchlist" });
+    }
+
+    const { movieId } = req.params;
+
+    const newMovie = await Movie.findById(movieId);
+    if (!newMovie) {
+      return res.status(404).json({ message: "Movie not found" });
+    }
+
+    req.user.watchlist.push({
+      movie: newMovie._id,
+      watched: false,
+    });
+
+    await req.user.save();
+    return res.status(201).json(newMovie);
+  } catch (error) {
+    return next(error);
+  }
+};
+
+exports.getWatchlist = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user._id)
+      .populate("watchlist.movie", "title")
+      .select("watchlist");
+
+    return res.json(user.watchlist);
+  } catch (error) {
+    return next(error);
+  }
+};
+
+exports.updateWatchlist = async (req, res, next) => {
+  try {
+    const { movieId } = req.params;
+
+    const movie = req.user.watchlist.find((item) => item.movie.equals(movieId));
+    if (!movie) {
+      return res.status(404).json({ message: "Movie not found in watchlist" });
+    }
+    console.log(movie);
+
+    movie.watched = true;
+    await req.user.save();
+
+    return res.status(200).json({ message: "Movie marked as watched" });
   } catch (error) {
     return next(error);
   }

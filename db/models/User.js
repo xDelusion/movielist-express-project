@@ -6,6 +6,12 @@ const authSchema = new Schema(
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     profileImage: String,
+    watchlist: [
+      {
+        movie: { type: Schema.Types.ObjectId, ref: "Movie" },
+        watched: { type: Boolean, default: false },
+      },
+    ],
     isStaff: { type: Boolean, default: false },
   },
   { timestamps: true }
