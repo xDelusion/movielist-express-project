@@ -4,12 +4,12 @@ const actorSchema = new Schema(
   {
     name: { type: String, required: true },
     dateOfBirth: { type: Date },
-    // movies: [
-    //   {
-    //     type: Schema.Types.ObjectId,
-    //     ref: "Movie",
-    //   },
-    // ],
+    movies: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Movie",
+      },
+    ],
   },
   { timestamps: true }
 );

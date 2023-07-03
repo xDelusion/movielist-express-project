@@ -7,15 +7,27 @@ const {
   addToWatchlist,
   getWatchlist,
   updateWatchlist,
+  updateMovie,
+  deleteMovie,
 } = require("./movies.controllers");
 const passport = require("passport");
 
 router.get("/", getMovie);
 router.post("/", passport.authenticate("jwt", { session: false }), addMovie);
-router.put(
+router.post(
   "/:movieId/add-review",
   passport.authenticate("jwt", { session: false }),
   reviewMovie
+);
+router.put(
+  "/:movieId",
+  passport.authenticate("jwt", { session: false }),
+  updateMovie
+);
+router.delete(
+  "/:movieId",
+  passport.authenticate("jwt", { session: false }),
+  deleteMovie
 );
 
 // Watchlist Routes

@@ -8,26 +8,25 @@ const movieSchema = new Schema(
       type: Number,
       default: null,
     },
-    genre: [
+    genres: [
       {
         type: Schema.Types.ObjectId,
         ref: "Genre",
       },
     ],
-    actors: {
-      type: [
-        {
-          type: String,
-          required: true,
-        },
-      ],
-      validate: {
-        validator: (actors) => {
-          return actors && actors.length > 0;
-        },
-        message: "The 'actors' field can't be empty.",
+    actors: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Actor",
+        required: true,
       },
-    },
+    ], // validate: {
+    //   validator: (actors) => {
+    //     return actors && actors.length > 0;
+    //   },
+    //   message: "The 'actors' field can't be empty.",
+    // },
+
     reviews: [
       {
         type: Schema.Types.ObjectId,

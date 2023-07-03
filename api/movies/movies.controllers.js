@@ -1,14 +1,31 @@
+const Actor = require("../../db/models/Actor");
+const Genre = require("../../db/models/Genre");
 const Movie = require("../../db/models/Movie");
 const MovieReview = require("../../db/models/MovieReview");
 const User = require("../../db/models/User");
 
 exports.getMovie = async (req, res, next) => {
   try {
-    const movies = await Movie.find()
-      .populate("genre", "name -_id")
-      .populate("reviews", "-movieId");
+    // Pagination
+    const page = parseInt(req.query.page) || 1; // Current page number
+    const limit = parseInt(req.query.limit) || 3; // Number of movies per page
+    const count = await Movie.countDocuments(); // Total count of movies
+    const totalPages = Math.ceil(count / limit); // Total number of pages
+    const skip = (page - 1) * limit; // Number of movies to skip
 
-    res.json(movies);
+    const movies = await Movie.find()
+      .skip(skip)
+      .limit(limit)
+      .populate("genres", "-_id name")
+      .populate("reviews", "-movieId")
+      .populate("actors.actor", "name");
+
+    return res.status(200).json({
+      movies,
+      page,
+      totalPages,
+      totalCount: count,
+    });
   } catch (error) {
     return next(error);
   }
@@ -21,8 +38,109 @@ exports.addMovie = async (req, res, next) => {
         .status(403)
         .json({ message: "Only staff members can add movies" });
     }
+
+    // const actorId = req.body.actors;
+    // const actor = await Actor.findById(actorId);
+    // if (!actor) {
+    //   return res.status(404).json({ message: "Actor not found" });
+    // }
+
+    const { title } = req.body;
+
+    const existingMovie = await Movie.findOne({ title });
+    if (existingMovie) {
+      return res.status(400).json({ message: "Movie already exists" });
+    }
+
     const newMovie = await Movie.create(req.body);
+
+    // newMovie.actors.push(actor._id);
+    await newMovie.save();
     return res.status(201).json(newMovie);
+  } catch (error) {
+    return next(error);
+  }
+};
+
+exports.updateMovie = async (req, res, next) => {
+  try {
+    if (!req.user.isStaff) {
+      return res
+        .status(403)
+        .json({ message: "Only staff members can add movies" });
+    }
+
+    const { movieId } = req.params;
+    const actorId = req.body.actors;
+
+    let movie = await Movie.findById(movieId);
+    if (!movie) {
+      return res.status(404).json({ message: "Movie not found" });
+    }
+
+    if (actorId) {
+      const actor = await Actor.findById(actorId);
+      if (!actor) {
+        return res.status(404).json({ message: "Actor not found" });
+      }
+      // Check if actor already exists in the movie
+      const isActorExist = movie.actors.includes(actor._id);
+      if (isActorExist) {
+        return res
+          .status(400)
+          .json({ message: "Actor already added to the movie" });
+      }
+      movie.actors = [...movie.actors, actorId];
+    }
+
+    // const genre = await Genre.findById(genreId);
+    // if (!genre) {
+    //   return res.status(404).json({ message: "Genre not found" });
+    // }
+    let genres = req.body.genres;
+
+    if (genres) {
+      let genre = await Genre.findOne({ name: genres });
+      if (!genre) {
+        return res.status(404).json({ message: "Genre not found" });
+      }
+      // Check if genre already exists in the movie
+      const isGenreExist = movie.genres.includes(genre._id);
+      if (isGenreExist) {
+        return res
+          .status(400)
+          .json({ message: "Genre already added to the movie" });
+      }
+      movie.genres = [...movie.genres, genre._id];
+    }
+
+    // movie.title = req.body.title;
+    // movie.releaseDate = req.body.releaseDate;
+    // movie.actors.push(...actorId);
+    // newMovie.actors.push(actor._id);
+    await movie.save();
+    return res.status(201).json(movie);
+  } catch (error) {
+    return next(error);
+  }
+};
+
+exports.deleteMovie = async (req, res, next) => {
+  try {
+    if (!req.user.isStaff) {
+      return res
+        .status(403)
+        .json({ message: "Only staff members can delete movies" });
+    }
+
+    const { movieId } = req.params;
+
+    let movie = await Movie.findByIdAndDelete(movieId);
+    if (!movie) {
+      return res.status(404).json({ message: "Movie not found" });
+    }
+
+    return res.status(200).json({ message: "Movie deleted successfully" });
   } catch (error) {
     return next(error);
   }
@@ -106,6 +224,16 @@ exports.addToWatchlist = async (req, res, next) => {
       return res.status(404).json({ message: "Movie not found" });
     }
 
+    const existingMovie = await User.findOne({
+      _id: req.user._id,
+      "watchlist.movie": newMovie._id,
+    });
+
+    if (existingMovie) {
+      return res
+        .status(400)
+        .json({ message: "You have already added this movie" });
+    }
     req.user.watchlist.push({
       movie: newMovie._id,
       watched: false,
@@ -138,7 +266,6 @@ exports.updateWatchlist = async (req, res, next) => {
     if (!movie) {
       return res.status(404).json({ message: "Movie not found in watchlist" });
     }
-    console.log(movie);
 
     movie.watched = true;
     await req.user.save();
