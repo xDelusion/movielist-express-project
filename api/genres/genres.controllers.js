@@ -32,9 +32,12 @@ exports.addGenre = async (req, res, next) => {
     }
 
     const newGenre = await Genre.create({ name });
-    movie.genres = [...movie.genres, genreId];
+    movie.genres = [...movie.genres, newGenre];
+    newGenre.movies = [...newGenre.movies, movieId];
+
     // movie.genres.push(newGenre._id);
     await movie.save();
+    await newGenre.save();
 
     return res.status(201).json(newGenre);
 

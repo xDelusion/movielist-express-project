@@ -19,12 +19,12 @@ exports.addActor = async (req, res, next) => {
         .json({ message: "Only staff members can add actors" });
     }
 
-    // const movieId = req.body.movies;
+    const movieId = req.body.movies;
 
-    // const movie = await Movie.findById(movieId);
-    // if (!movie) {
-    //   return res.status(404).json({ message: "Movie not found" });
-    // }
+    const movie = await Movie.findById(movieId);
+    if (!movie) {
+      return res.status(404).json({ message: "Movie not found" });
+    }
 
     // Check if the actor already exists
     const { name } = req.body;
@@ -33,11 +33,15 @@ exports.addActor = async (req, res, next) => {
     if (existingActor) {
       return res.status(400).json({ message: "Actor already exists" });
     }
-    const newActor = await Actor.create(req.body);
+    const newActor = await Actor.create({ name });
 
     // movie.actors.push(newActor._id);
 
-    // await movie.save();
+    newActor.movies = [...newActor.movies, movieId];
+    movie.actors = [...movie.actors, newActor];
+
+    await movie.save();
+    await newActor.save();
 
     return res.status(201).json(newActor);
   } catch (error) {
