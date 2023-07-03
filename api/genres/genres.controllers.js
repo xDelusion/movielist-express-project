@@ -18,12 +18,12 @@ exports.addGenre = async (req, res, next) => {
         .json({ message: "Only staff members can add genres" });
     }
 
-    // const movieId = req.body.movies;
+    const movieId = req.body.movies;
 
-    // const movie = await Movie.findById(movieId);
-    // if (!movie) {
-    //   return res.status(404).json({ message: "Movie not found" });
-    // }
+    const movie = await Movie.findById(movieId);
+    if (!movie) {
+      return res.status(404).json({ message: "Movie not found" });
+    }
 
     const { name } = req.body;
     const existingGenre = await Genre.findOne({ name });
@@ -31,10 +31,10 @@ exports.addGenre = async (req, res, next) => {
       return res.status(400).json({ message: "Genre already exists" });
     }
 
-    const newGenre = await Genre.create(req.body);
-
+    const newGenre = await Genre.create({ name });
+    movie.genres = [...movie.genres, genreId];
     // movie.genres.push(newGenre._id);
-    // await movie.save();
+    await movie.save();
 
     return res.status(201).json(newGenre);
 

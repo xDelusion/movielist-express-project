@@ -18,7 +18,7 @@ exports.getMovie = async (req, res, next) => {
       .limit(limit)
       .populate("genres", "-_id name")
       .populate("reviews", "-movieId")
-      .populate("actors.actor", "name");
+      .populate("actors", "name");
 
     return res.status(200).json({
       movies,
